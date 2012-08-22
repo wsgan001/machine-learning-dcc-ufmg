@@ -1,0 +1,23 @@
+<project name="LAC-Weka-3.7" default="dist" basedir="..">
+
+	<property name="src" value="src/main/java" />
+	<property name="lib" value="lib" />
+	<property name="build" value="build" />
+	<property name="dist" value="dist" />
+	<property name="package" value="package/lazyAssociativeClassifier" />
+
+	<path id="project.class.path">
+		<fileset dir="${lib}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<target name="dist">
+		<copy todir="${package}/src">
+			<fileset>
+				<include name="**/*.java"/>
+			</fileset>
+		</copy>
+	</target>
+
+</project>
