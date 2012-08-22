@@ -1,6 +1,6 @@
 <project name="LAC-Weka-3.7" default="dist" basedir="..">
 
-	<property name="src" value="src/main/java" />
+	<property name="src" value="src" />
 	<property name="lib" value="lib" />
 	<property name="build" value="build" />
 	<property name="dist" value="dist" />
@@ -14,7 +14,7 @@
 
 	<target name="dist">
 		<copy todir="${package}/src">
-			<fileset>
+			<fileset dir="${src}">
 				<include name="**/*.java"/>
 			</fileset>
 		</copy>
