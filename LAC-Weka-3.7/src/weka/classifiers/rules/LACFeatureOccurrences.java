@@ -32,7 +32,7 @@ public class LACFeatureOccurrences implements Serializable
 	private static final long serialVersionUID = -3942414672290094335L;
 
 	private Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>();
-	private final LRU<List<Integer>, List<Integer>> cache = new LRU<List<Integer>, List<Integer>>(10000);
+	private final LACLRU<List<Integer>, List<Integer>> cache = new LACLRU<List<Integer>, List<Integer>>(10000);
 
 	/**
 	 * Creates the map of features for all entries in {@link LACInstances}.

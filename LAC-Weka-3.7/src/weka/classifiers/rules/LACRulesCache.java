@@ -23,7 +23,7 @@ public class LACRulesCache implements Serializable
 {
 	private static final long serialVersionUID = -1340440155675141479L;
 
-	private LRU<List<Integer>, List<LACRule>> rulesPerFeatures = new LRU<List<Integer>, List<LACRule>>(50000);
+	private LACLRU<List<Integer>, List<LACRule>> rulesPerFeatures = new LACLRU<List<Integer>, List<LACRule>>(50000);
 
 	/**
 	 * Gets all rules that are applicable to instances that have the given

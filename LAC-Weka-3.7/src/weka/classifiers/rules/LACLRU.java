@@ -18,7 +18,7 @@ import java.util.LinkedHashMap;
  * @author Adriano Veloso (algorithm and original C++ implementation)
  * @author Gesse Dafe (Java implementation)
  */
-public class LRU<K, V> extends LinkedHashMap<K, V>
+public class LACLRU<K, V> extends LinkedHashMap<K, V>
 {
 	private static final long serialVersionUID = -8788545308834303897L;
 
@@ -27,7 +27,7 @@ public class LRU<K, V> extends LinkedHashMap<K, V>
 	/**
 	 * @param capacity
 	 */
-	public LRU(int capacity)
+	public LACLRU(int capacity)
 	{
 		super(capacity, 1.1f, true);
 		this.capacity = capacity;
