@@ -1,3 +1,13 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package weka.classifiers.rules;
 
 import java.io.Serializable;
@@ -6,23 +16,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import weka.core.Instance;
-import weka.core.Instances;
 
 /**
  * A simple way to store and lookup instances that have a given combination of
  * features. For each feature on training set, we store an entry on a
  * {@link Map}. <br/>
- * This entry is a set of integers. Each integer is the index of an {@link Instance}
+ * This entry is a set of integers. Each integer is the index of an {@link LACInstance}
  * that contains those features.
  * 
- * @author Adriano Veloso (algorithm and original C++ implementation)
  * @author Gesse Dafe (Java implementation)
+ * @author Adriano Veloso (algorithm and original C++ implementation)
  */
-public class FeatureOccurrences implements Serializable
+public class LACFeatureOccurrences implements Serializable
 {
 	private static final long serialVersionUID = -3942414672290094335L;
 
@@ -30,42 +35,27 @@ public class FeatureOccurrences implements Serializable
 	private final LRU<List<Integer>, List<Integer>> cache = new LRU<List<Integer>, List<Integer>>(10000);
 
 	/**
-	 * Creates the map of features for all entries in {@link Instances}.
+	 * Creates the map of features for all entries in {@link LACInstances}.
 	 * 
 	 * @param instances
 	 */
-	void createMap(Instances instances)
+	void createMap(LACInstances instances)
 	{
-		Map<Integer, Set<Integer>> tempMap = new HashMap<Integer, Set<Integer>>();
-		
-		int numInstances = instances.numInstances();
-		
-		for (int currentPosition = 0; currentPosition < numInstances; currentPosition++)
+		for (int currentPosition = 0; currentPosition < instances.length(); currentPosition++)
 		{
-			Instance currentInstance = instances.get(currentPosition);
-			List<Integer> indexedFeatures = instanceFeaturesAsIntList(currentInstance);
+			LACInstance currentInstance = instances.getInstance(currentPosition);
+			List<Integer> indexedFeatures = currentInstance.getIndexedFeatures();
 			int size = indexedFeatures.size();
 			for (int currentFeaturePosition = 0; currentFeaturePosition < size; currentFeaturePosition++)
 			{
 				int currentIndexedFeature = indexedFeatures.get(currentFeaturePosition);
-				Set<Integer> instancesContainingFeature = tempMap.get(currentIndexedFeature);
+				List<Integer> instancesContainingFeature = map.get(currentIndexedFeature);
 				if (instancesContainingFeature == null)
 				{
-					instancesContainingFeature = new TreeSet<Integer>();
-					tempMap.put(currentIndexedFeature, instancesContainingFeature);
+					instancesContainingFeature = new ArrayList<Integer>();
+					map.put(currentIndexedFeature, instancesContainingFeature);
 				}
 				instancesContainingFeature.add(currentPosition);
-			}
-		}
-		
-		for(Integer key : tempMap.keySet())
-		{
-			Set<Integer> set = tempMap.get(key);
-			if(set != null)
-			{
-				List<Integer> list = new ArrayList<Integer>(set.size());
-				list.addAll(set);
-				map.put(key, list);
 			}
 		}
 	}
@@ -125,11 +115,6 @@ public class FeatureOccurrences implements Serializable
 			}
 		}
 
-		if(instances == null)
-		{
-			instances = Collections.emptyList();
-		}
-		
 		return instances;
 	}
 
@@ -201,25 +186,5 @@ public class FeatureOccurrences implements Serializable
 			}
 			return start;
 		}
-	}
-	
-	public List<Integer> instanceFeaturesAsIntList(Instance instance)
-	{
-		List<Integer> feats = new ArrayList<Integer>();
-		
-		int numAtts = instance.numAttributes();
-		for(int i = 0; i < numAtts; i++)
-		{
-			int featIndex = (int) instance.value(i);
-			boolean missing = instance.isMissing(i);
-			boolean isClass = i == instance.classIndex();
-			
-			if(!isClass && !missing)
-			{
-				feats.add(featIndex);
-			}
-		}
-		
-		return feats;
 	}
 }

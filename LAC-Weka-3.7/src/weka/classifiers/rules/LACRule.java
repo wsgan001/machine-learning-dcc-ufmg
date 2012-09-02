@@ -1,23 +1,33 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package weka.classifiers.rules;
 
-import java.io.Serializable;
+import java.util.List;
 
 /**
  * An associative rule extracted from the training data
  * 
- * @author Gesse Dafe (Java implementation)
  * @author Adriano Veloso (algorithm and original C++ implementation)
+ * @author Gesse Dafe (Java implementation)
  */
-public class LACRule implements Serializable
+public class LACRule
 {
-	private static final long serialVersionUID = 925206930131844401L;
-
 	private final double confidence;
 	private final double support;
 	private final int predictedClass;
+	private List<String> featuresLabels;
+	private String classLabel;
 
 	/**
-	 * Constructs a new {@link LACRule}
+	 * Constructs a new {@link Rule}
 	 * 
 	 * @param support
 	 * @param confidence
@@ -52,5 +62,21 @@ public class LACRule implements Serializable
 	int getPredictedClass()
 	{
 		return predictedClass;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "" + featuresLabels + "->" + classLabel + " / " + confidence + " (" + support + ")";
+	}
+
+	public void setPattern(List<String> featuresLabels)
+	{
+		this.featuresLabels = featuresLabels;
+	}
+
+	public void setClassLabel(String classLabel)
+	{
+		this.classLabel = classLabel;
 	}
 }

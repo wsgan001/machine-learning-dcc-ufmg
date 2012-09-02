@@ -57,6 +57,12 @@
 				<include name="*"/>
 			</fileset>
 		</zip>
+		<delete includeemptydirs="true">
+			<fileset dir="${package}/src">
+				<include name="**/*"/>
+				<include name="*"/>
+			</fileset>
+		</delete>
 	</target>
 	
 </project>

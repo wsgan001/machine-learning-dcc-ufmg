@@ -1,16 +1,23 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package weka.classifiers.rules;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
-
-import weka.core.Instance;
-import weka.core.Instances;
+import java.util.Set;
 
 /**
- * Manages the rules contained in the training data.
+ * Extracts classification rules from training data.
  * 
  * @author Gesse Dafe (Java implementation)
  * @author Adriano Veloso (algorithm and original C++ implementation)
@@ -21,28 +28,28 @@ public class LACRules implements Serializable
 
 	private final int maxRuleSize;
 	private LACRulesCache cache = new LACRulesCache();
-	private Instances trainingSet;
-	private DataSetIndex trainingIndex;
+	private LACInstances trainingSet;
 	private double minSupport;
 	private double minConfidence;
+	private boolean debug;
 	
 	/**
 	 * Restricted access constructor
 	 * @param training
-	 * @param trainingIndex
 	 * @param maxRuleSize
 	 * @param minSupport
 	 * @param minConfidence
+	 * @param debug 
 	 * @param outFile 
 	 * @throws Exception 
 	 */
-	LACRules(Instances training, DataSetIndex trainingIndex, int maxRuleSize, double minSupport, double minConfidence) throws Exception
+	LACRules(LACInstances training, int maxRuleSize, double minSupport, double minConfidence, boolean debug) throws Exception
 	{
 		this.trainingSet = training;
-		this.trainingIndex = trainingIndex;
 		this.maxRuleSize = maxRuleSize;
 		this.minSupport = minSupport;
 		this.minConfidence = minConfidence;
+		this.debug = debug;
 	}
 
 	/**
@@ -51,7 +58,7 @@ public class LACRules implements Serializable
 	 * @param testInstance
 	 * @throws Exception 
 	 */
-	double[] calculateProbabilities(Instance testInstance) throws Exception
+	double[] calculateProbabilities(LACInstance testInstance) throws Exception
 	{
 		double[] probs;
 		double[] scores = calculateScores(testInstance);
@@ -72,15 +79,12 @@ public class LACRules implements Serializable
 		}
 		else
 		{
-			int numClasses = trainingSet.classAttribute().numValues();
-			Enumeration<?> allClasses = trainingSet.classAttribute().enumerateValues();
-			probs = new double[numClasses];
-			while(allClasses.hasMoreElements())
+			Set<Integer> allClasses = trainingSet.getAllClasses();
+			probs = new double[allClasses.size()];
+			for (Integer clazz : allClasses) 
 			{
-				String classValue = (String) allClasses.nextElement();
-				int classIndex = trainingSet.classAttribute().indexOfValue(classValue);
-				double count = trainingIndex.getInstancesOfClass(classIndex).size();
-				probs[classIndex] = (count / ((double) trainingSet.numInstances()));
+				double count = trainingSet.getInstancesOfClass(clazz).size();
+				probs[clazz] = (count / ((double) trainingSet.length()));
 			}
 		}
 
@@ -95,10 +99,10 @@ public class LACRules implements Serializable
 	 * @return
 	 * @throws Exception 
 	 */
-	private double[] calculateScores(Instance testInstance) throws Exception
+	private double[] calculateScores(LACInstance testInstance) throws Exception
 	{
 		List<Integer> testInstanceFeatures = new ArrayList<Integer>();
-		testInstanceFeatures.addAll(trainingIndex.instanceFeaturesAsIntList(testInstance));
+		testInstanceFeatures.addAll(testInstance.getIndexedFeatures());
 		Collections.sort(testInstanceFeatures);
 		
 		List<LACRule> allRulesForFeatures = new ArrayList<LACRule>(10000);
@@ -110,7 +114,7 @@ public class LACRules implements Serializable
 			extractRules(featCombination, testInstanceFeatures, allRulesForFeatures, numPatterns);
 		}
 		
-		int numClasses = trainingSet.classAttribute().numValues();
+		int numClasses = trainingSet.getAllClasses().size();
 		double[] scores = new double[numClasses];
 		int numRules = allRulesForFeatures.size();
 		if (numRules > 0)
@@ -206,8 +210,8 @@ public class LACRules implements Serializable
 	{
 		List<LACRule> rules = new ArrayList<LACRule>();
 
-		List<Integer> instancesWithFeatures = trainingIndex.getInstancesWithFeatures(featuresCombination);
-		int numClasses = trainingSet.classAttribute().numValues();
+		List<Integer> instancesWithFeatures = trainingSet.getInstancesWithFeatures(featuresCombination);
+		int numClasses = trainingSet.getAllClasses().size();
 		int[] count = new int[numClasses];
 
 		int size = instancesWithFeatures.size();
@@ -217,8 +221,8 @@ public class LACRules implements Serializable
 			for (int i = 0; i < size; i++)
 			{
 				Integer instanceIndex = instancesWithFeatures.get(i);
-				Instance instance = trainingSet.get(instanceIndex);
-				int predictedClass = (int) instance.classValue();
+				LACInstance instance = trainingSet.getInstance(instanceIndex);
+				int predictedClass = instance.getIndexedClass();
 				count[predictedClass] = count[predictedClass] + 1;
 			}
 
@@ -227,12 +231,18 @@ public class LACRules implements Serializable
 				int classCount = count[i];
 				if (classCount > 0)
 				{
-					double support = (double) classCount / (double) trainingSet.numInstances();
+					double support = (double) classCount / (double) trainingSet.length();
 					double confidence = (double) classCount / (double) size;
 
 					if(support > minSupport && confidence > minConfidence)
 					{
 						LACRule rule = new LACRule(support, confidence, i);
+						if(debug)
+						{
+							rule.setPattern(trainingSet.indexesToLabels(featuresCombination));
+							rule.setClassLabel(trainingSet.getClassByIndex(i).getLabel());
+							System.out.println(rule);
+						}
 						rules.add(rule);
 					}
 				}

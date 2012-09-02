@@ -1,4 +1,3 @@
-package weka.classifiers.rules;
 /*
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -9,10 +8,13 @@ package weka.classifiers.rules;
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+package weka.classifiers.rules;
+
 import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
+import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
@@ -39,19 +41,109 @@ public class LAC extends AbstractClassifier implements TechnicalInformationHandl
 	private double minSupport = 0;
 	private int maxRuleSize = 4;
 
+	private LACInstances trainingInstances;
 	private LACRules rules;
-	
+
 	@Override
 	public void buildClassifier(Instances data) throws Exception
 	{
-		DataSetIndex datasetIndex = new DataSetIndex(data);
-		this.rules = new LACRules(data, datasetIndex, maxRuleSize - 1, minSupport, minConfidence);
+		boolean considerFeaturePositions = checkNominalAttributes(data);
+		this.trainingInstances = new LACInstances(considerFeaturePositions);
+		int numInstances = data.numInstances();
+		
+		for (int i = 0; i < numInstances; i++)
+		{
+			Instance wekaInstance = data.get(i);
+			LACInstance trainingInstance = trainingInstances.createNewTrainingInstance();
+			populateInstance(wekaInstance, trainingInstance, true);
+		}
+		
+		this.rules = this.trainingInstances.prepare(maxRuleSize - 1, minSupport, minConfidence, considerFeaturePositions, getDebug());
 	}
 
 	@Override
-	public double[] distributionForInstance(Instance instance) throws Exception
+	public double[] distributionForInstance(Instance wekaInstance) throws Exception
 	{
-		return rules.calculateProbabilities(instance);
+		LACInstance testInstance = new LACInstance(trainingInstances);
+		populateInstance(wekaInstance, testInstance, false);
+		
+		double[] probs = rules.calculateProbabilities(testInstance);
+		double[] result = new double[wekaInstance.classAttribute().numValues()];
+		
+		for (int i = 0; i < probs.length; i++)
+		{
+			String value = trainingInstances.getClassByIndex(i).getLabel();
+			int index = wekaInstance.classAttribute().indexOfValue(value);
+			if(index >= 0)
+			{
+				result[index] = probs[i];
+			}
+		}
+		
+		return result;
+	}
+
+	/**
+	 * Populates a {@link LACInstance} with the contents of an Weka {@link Instance}
+	 * @param wekaInstance
+	 * @param lacInstance
+	 * @param populateClass 
+	 */
+	private void populateInstance(Instance wekaInstance, LACInstance lacInstance, boolean populateClass)
+	{
+		int numAtts = wekaInstance.numAttributes();
+		for (int i = 0; i < numAtts; i++)
+		{
+			if(i != wekaInstance.classIndex())
+			{
+				String label = wekaInstance.toString(i);
+				lacInstance.addFeature(label);
+			}
+			else 
+			{
+				if(populateClass)
+				{
+					String clazz = wekaInstance.classAttribute().value((int) wekaInstance.classValue());
+					lacInstance.setClass(clazz);
+				}
+				else
+				{
+					String clazz = wekaInstance.classAttribute().value((int) wekaInstance.classValue());
+					lacInstance.setHiddenClass(clazz);
+				}
+			}
+		}	
+	}
+	
+	/**
+	 * Returns true if all attributes are nominal or false
+	 * if all of them are string. Throws a runtime exception
+	 * for mixed attribute types.
+	 * 
+	 * @param data
+	 * @return
+	 */
+	private boolean checkNominalAttributes(Instances data)
+	{
+		boolean hasNominalAtt = false;
+		boolean hasStringAtt = false;
+		
+		for(int i = 0; i < data.numAttributes(); i++)
+		{
+			if(data.classIndex() != i)
+			{
+				Attribute att = data.attribute(i);
+				hasNominalAtt = hasNominalAtt || att.isNominal();
+				hasStringAtt = hasStringAtt || att.isString();
+			}
+		}
+		
+		if(hasNominalAtt && hasStringAtt)
+		{
+			throw new RuntimeException("Lazy Associative Classifiers can only handle datasets were all attributes have the same type. Make sure all attributes are either string or nominal.");
+		}
+		
+		return hasNominalAtt;
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -111,16 +203,13 @@ public class LAC extends AbstractClassifier implements TechnicalInformationHandl
 	public Capabilities getCapabilities()
 	{
 	    Capabilities result = super.getCapabilities();
+	    
 	    result.disableAll();
-
 	    result.enable(Capability.STRING_ATTRIBUTES);
 	    result.enable(Capability.NOMINAL_ATTRIBUTES);
 	    result.enable(Capability.MISSING_VALUES);
-
-	    result.enable(Capability.STRING_CLASS);
 	    result.enable(Capability.NOMINAL_CLASS);
-
-	    result.setMinimumNumberInstances(0);
+	    result.setMinimumNumberInstances(1);
 	    
 	    return result;
 	}
