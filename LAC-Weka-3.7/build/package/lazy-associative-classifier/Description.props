@@ -29,7 +29,7 @@ License=Apache License 2.0
 Description=Implements the LAC (Lazy Associative Classifier) algorithm, which uses associative rules to execute classifications. Unlike other Apriori-based classifiers, LAC algorithm computes association rules in a demand-driven basis. For each instance to be classified, it filters the training set and produces only useful rules for that instance, outperforming traditional associative classifiers in both time and accuracy. For more information: [Adriano Veloso, Wagner Meira Jr., Mohammed Zaki. Lazy Associative Classification. ICDM '06 Proceedings of the Sixth International Conference on Data Mining, Pages 645-654, IEEE Computer Society Washington, DC, USA]. 
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://machine-learning-dcc-ufmg.googlecode.com/files/lac-weka37-1.0.0.zip
+PackageURL=http://machine-learning-dcc-ufmg.googlecode.com/files/lazy-associative-classifier-1.0.0.zip
 
 # URL for further information
 URL=http://code.google.com/p/machine-learning-dcc-ufmg/
