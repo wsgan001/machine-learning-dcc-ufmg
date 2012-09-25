@@ -257,4 +257,59 @@ public class LAC extends AbstractClassifier implements TechnicalInformationHandl
 	{
 		this.maxRuleSize = maxRuleSize;
 	}
+
+	/**
+	 * Enables tool tip text popups for the minConfidence parameter, when listed in the
+	 * "About" popup window.
+	 */
+	public String minConfidenceTipText()
+	{
+		return "Enumerating all possible classification rules may be is costly. " +
+				"This parameter imposes a confidence threshold for pruning classification " +
+				"rules: only rules with confidence greater or equal to this value will " +
+				"be considered. The default value is 0 (zero).";
+	}
+	
+	/**
+	 * Enables tool tip text popups for the minSupport parameter, when listed in the
+	 * "About" popup window.
+	 */
+	public String minSupportTipText()
+	{
+		return "Enumerating all possible classification rules may be is costly. " +
+				"This parameter imposes a support threshold for pruning classification " +
+				"rules: only rules with support greater or equal to this value will " +
+				"be considered. The default value is 0 (zero).";
+	}
+	
+	/**
+	 * Enables tool tip text popups for the maxRuleSize parameter, when listed in the
+	 * "About" popup window.
+	 */
+	public String maxRuleSizeTipText()
+	{
+		return "Determines the maximum length of a classification rule " +
+				"(its number of features plus 1, because class attribute is " +
+				"also considered). Mining large rules is costly, but sometimes " +
+				"the accuracy gain is worth. The default value for this option is 4.";
+	}
+	
+	/**
+	 * Enables "About" and "Capabilities" info to appear in the
+	 * GenericObjectEditor in the GUI.
+	 */
+	public String globalInfo()
+	{
+		return "Implements the LAC (Lazy Associative Classifier) algorithm, " +
+				"which uses associative rules to execute classifications. " +
+				"Unlike other Apriori-based classifiers, LAC algorithm computes " +
+				"association rules in a demand-driven basis. For each instance " +
+				"to be classified, it filters the training set and produces only " +
+				"useful rules for that instance, outperforming traditional associative " +
+				"classifiers in both time and accuracy. For more information: " +
+				"[Adriano Veloso, Wagner Meira Jr., Mohammed Zaki. " +
+				"Lazy Associative Classification. ICDM '06 Proceedings of the " +
+				"Sixth International Conference on Data Mining, Pages 645-654, " +
+				"IEEE Computer Society Washington, DC, USA].";
+	}
 }
