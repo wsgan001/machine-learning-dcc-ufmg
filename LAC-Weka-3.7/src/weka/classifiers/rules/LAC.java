@@ -264,10 +264,11 @@ public class LAC extends AbstractClassifier implements TechnicalInformationHandl
 	 */
 	public String minConfidenceTipText()
 	{
-		return "Enumerating all possible classification rules may be is costly. " +
-				"This parameter imposes a confidence threshold for pruning classification " +
+		return "Imposes a confidence threshold for pruning classification " +
 				"rules: only rules with confidence greater or equal to this value will " +
-				"be considered. The default value is 0 (zero).";
+				"be considered. Mining all possible rules is costly, but sometimes " +
+				"the accuracy gain is worth. The default value for this parameter is 0 " +
+				"(zero).";
 	}
 	
 	/**
@@ -276,10 +277,11 @@ public class LAC extends AbstractClassifier implements TechnicalInformationHandl
 	 */
 	public String minSupportTipText()
 	{
-		return "Enumerating all possible classification rules may be is costly. " +
-				"This parameter imposes a support threshold for pruning classification " +
+		return "Imposes a support threshold for pruning classification " +
 				"rules: only rules with support greater or equal to this value will " +
-				"be considered. The default value is 0 (zero).";
+				"be considered. Mining all possible rules is costly, but sometimes " +
+				"the accuracy gain is worth. The default value for this parameter is 0 " +
+				"(zero).";
 	}
 	
 	/**
@@ -288,9 +290,9 @@ public class LAC extends AbstractClassifier implements TechnicalInformationHandl
 	 */
 	public String maxRuleSizeTipText()
 	{
-		return "Determines the maximum length of a classification rule " +
-				"(its number of features plus 1, because class attribute is " +
-				"also considered). Mining large rules is costly, but sometimes " +
+		return "Prunes classification rules by imposing a maximum number of features in each rule. " +
+				"The class attribute is also considered, e.g. a rule of size 4 is a rule having three " +
+				"attributes and one class. Mining large rules is costly, but sometimes " +
 				"the accuracy gain is worth. The default value for this option is 4.";
 	}
 	
