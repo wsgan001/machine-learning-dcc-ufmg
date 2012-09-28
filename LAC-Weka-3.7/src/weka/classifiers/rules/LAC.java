@@ -314,4 +314,28 @@ public class LAC extends AbstractClassifier implements TechnicalInformationHandl
 				"Sixth International Conference on Data Mining, Pages 645-654, " +
 				"IEEE Computer Society Washington, DC, USA].";
 	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder st = new StringBuilder("Lazy Associative Classifier.");
+		
+		if(this.trainingInstances != null)
+		{
+			st.append(" Running with ");
+			st.append(this.trainingInstances.length());
+			st.append(" instances and ");
+			st.append(this.trainingInstances.getAllClasses().size());
+			st.append(" distinct classes.");
+		}
+		
+		st.append(" Options: ");
+		String[] ops = getOptions();
+		for (int i = 0; i < ops.length; i++)
+		{
+			st.append(ops[i]);
+			st.append(" ");
+		}
+		return st.toString();
+	}
 }
