@@ -1,5 +1,7 @@
 <project name="LAC-Weka-3.7" default="dist-zip" basedir="..">
 
+	<property name="version" value="1.0.0"/>
+	
 	<property name="src" value="src" />
 	<property name="lib" value="lib" />
 	<property name="build" value="build" />
@@ -51,7 +53,7 @@
 	</target>
 
 	<target name="dist-zip" depends="dist-folder">
-		<zip destfile="${dist}/lazy-associative-classifier.zip">
+		<zip destfile="${dist}/lazy-associative-classifier-${version}.zip">
 			<fileset dir="${package}">
 				<include name="**/*"/>
 				<include name="*"/>
