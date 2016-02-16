@@ -1,0 +1,1 @@
+Some machine learning algorithms have been designed by researchers from Computer Science Dept. of Federal University of Minas Gerais (UFMG). To make them available to community, we decided to create  implementations and publish them under Apache License 2.0.
